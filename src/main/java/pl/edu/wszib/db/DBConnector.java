@@ -3,10 +3,7 @@ package pl.edu.wszib.db;
 
 import pl.edu.wszib.model.User;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 
 public class DBConnector {
@@ -34,7 +31,28 @@ public class DBConnector {
         }catch(SQLException e){
             e.printStackTrace();
         }
+    }
 
+    public static User getUser(String login, String password){
+        String sqlSelect = "SELECT * FROM user WHERE login = ? AND password = ?";
+        try {
+            PreparedStatement preparedStatement = DBConnector.connection.prepareStatement(sqlSelect);
+            preparedStatement.setString(1, login);
+            preparedStatement.setString(2, password);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()){
+                User userFromDB = new User();
+                userFromDB.setId(resultSet.getInt("id"));
+                userFromDB.setLogin(resultSet.getString("login"));
+                userFromDB.setPassword(resultSet.getString("password"));
+
+                return userFromDB;
+            }
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 }
