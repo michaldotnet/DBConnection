@@ -1,6 +1,7 @@
 package pl.edu.wszib.db;
 
 
+import org.apache.commons.codec.digest.DigestUtils;
 import pl.edu.wszib.model.User;
 
 import java.sql.*;
@@ -25,7 +26,7 @@ public class DBConnector {
             PreparedStatement preparedStatement = DBConnector.connection.prepareStatement(sql);
             preparedStatement.setInt(1, user.getId());
             preparedStatement.setString(2, user.getLogin());
-            preparedStatement.setString(3, user.getPassword());
+            preparedStatement.setString(3, DigestUtils.md5Hex(user.getPassword()));
 
             preparedStatement.executeUpdate();
         }catch(SQLException e){
@@ -38,13 +39,18 @@ public class DBConnector {
         try {
             PreparedStatement preparedStatement = DBConnector.connection.prepareStatement(sqlSelect);
             preparedStatement.setString(1, login);
-            preparedStatement.setString(2, password);
+            preparedStatement.setString(2, DigestUtils.md5Hex(password));
             ResultSet resultSet = preparedStatement.executeQuery();
             while(resultSet.next()){
                 User userFromDB = new User();
                 userFromDB.setId(resultSet.getInt("id"));
                 userFromDB.setLogin(resultSet.getString("login"));
                 userFromDB.setPassword(resultSet.getString("password"));
+
+                if(userFromDB.getPassword().equals(DigestUtils.md5Hex(password))){
+                    return userFromDB;
+                }
+
 
                 return userFromDB;
             }
